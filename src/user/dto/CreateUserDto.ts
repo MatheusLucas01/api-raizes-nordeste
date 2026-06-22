@@ -12,23 +12,23 @@ import { Role } from '../../generated/prisma/client';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'Maria Silva' })
-  @IsString()
+  @IsString({ message: 'O nome deve ser um texto.' })
   name!: string;
 
   @ApiProperty({ example: 'maria@example.com' })
-  @IsEmail()
+  @IsEmail({}, { message: 'E-mail inválido.' })
   email!: string;
 
   @ApiProperty({ example: 'Senha@123', minLength: 8 })
-  @IsString()
-  @MinLength(8)
+  @IsString({ message: 'A senha deve ser um texto.' })
+  @MinLength(8, { message: 'A senha deve ter ao menos 8 caracteres.' })
   password!: string;
 
   @ApiProperty({
     example: true,
     description: 'O consentimento LGPD é obrigatório.',
   })
-  @IsBoolean()
+  @IsBoolean({ message: 'lgpdConsent deve ser verdadeiro ou falso.' })
   @Equals(true, { message: 'O consentimento LGPD é obrigatório.' })
   lgpdConsent!: boolean;
 
@@ -38,6 +38,9 @@ export class CreateUserDto {
     description: 'Papel do usuário. Apenas ADMIN pode definir.',
   })
   @IsOptional()
-  @IsEnum(Role)
+  @IsEnum(Role, {
+    message:
+      'role deve ser um dos valores: CLIENT, ATTENDANT, KITCHEN, MANAGER, ADMIN.',
+  })
   role?: Role;
 }

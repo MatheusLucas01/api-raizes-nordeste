@@ -3,6 +3,6 @@ import { IsJWT } from 'class-validator';
 
 export class RefreshTokenDto {
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-  @IsJWT()
+  @IsJWT({ message: 'refreshToken deve ser um JWT válido.' })
   refreshToken!: string;
 }
