@@ -9,6 +9,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { UnitsModule } from './units/units.module';
 import { ProductsModule } from './products/products.module';
 import { StockModule } from './stock/stock.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StockModule } from './stock/stock.module';
     UnitsModule,
     ProductsModule,
     StockModule,
+    OrdersModule,
   ],
 
   controllers: [],
