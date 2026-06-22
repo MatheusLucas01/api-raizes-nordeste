@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseEnumPipe,
   ParseIntPipe,
   Post,
   Query,
@@ -11,10 +10,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MovementsService } from './movements.service';
 import { CreateMovementDto } from './dto/create-movement.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { MovementsQueryDto } from './dto/movements-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { MovementType, Role } from '../generated/prisma/client';
+import { Role } from '../generated/prisma/client';
 
 @ApiTags('stock-movements')
 @ApiBearerAuth()
@@ -36,19 +35,17 @@ export class MovementsController {
   @Get()
   list(
     @Param('unitId', ParseIntPipe) unitId: number,
-    @Query() pagination: PaginationDto,
-    @Query('productId', new ParseIntPipe({ optional: true }))
-    productId?: number,
-    @Query('type', new ParseEnumPipe(MovementType, { optional: true }))
-    type?: MovementType,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
+    @Query() query: MovementsQueryDto,
   ) {
-    return this.movementsService.list(unitId, pagination, {
-      productId,
-      type,
-      from: from ? new Date(from) : undefined,
-      to: to ? new Date(to) : undefined,
-    });
+    return this.movementsService.list(
+      unitId,
+      { page: query.page, limit: query.limit },
+      {
+        productId: query.productId,
+        type: query.type,
+        from: query.from ? new Date(query.from) : undefined,
+        to: query.to ? new Date(query.to) : undefined,
+      },
+    );
   }
 }

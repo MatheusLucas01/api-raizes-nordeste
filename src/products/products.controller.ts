@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -15,7 +14,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { ProductsQueryDto } from './dto/products-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/client';
 
@@ -32,13 +31,11 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('onlyActive', new ParseBoolPipe({ optional: true }))
-    onlyActive?: boolean,
-    @Query('category') category?: string,
-  ) {
-    return this.productsService.findAll(pagination, { onlyActive, category });
+  findAll(@Query() query: ProductsQueryDto) {
+    return this.productsService.findAll(
+      { page: query.page, limit: query.limit },
+      { onlyActive: query.onlyActive, category: query.category },
+    );
   }
 
   @Get(':id')

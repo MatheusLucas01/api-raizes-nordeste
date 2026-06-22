@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -16,7 +15,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
 import { AddMenuItemDto } from './dto/add-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { MenuQueryDto } from './dto/menu-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '../generated/prisma/client';
@@ -40,15 +39,13 @@ export class MenuController {
   @Get()
   list(
     @Param('unitId', ParseIntPipe) unitId: number,
-    @Query() pagination: PaginationDto,
-    @Query('onlyAvailable', new ParseBoolPipe({ optional: true }))
-    onlyAvailable?: boolean,
-    @Query('category') category?: string,
+    @Query() query: MenuQueryDto,
   ) {
-    return this.menuService.listMenu(unitId, pagination, {
-      onlyAvailable,
-      category,
-    });
+    return this.menuService.listMenu(
+      unitId,
+      { page: query.page, limit: query.limit },
+      { onlyAvailable: query.onlyAvailable, category: query.category },
+    );
   }
 
   @Get(':productId')

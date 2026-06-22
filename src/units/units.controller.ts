@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -15,7 +14,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UnitsService } from './units.service';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { UnitsQueryDto } from './dto/units-query.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/client';
 
@@ -32,12 +31,11 @@ export class UnitsController {
   }
 
   @Get()
-  findAll(
-    @Query() pagination: PaginationDto,
-    @Query('onlyActive', new ParseBoolPipe({ optional: true }))
-    onlyActive?: boolean,
-  ) {
-    return this.unitsService.findAll(pagination, onlyActive);
+  findAll(@Query() query: UnitsQueryDto) {
+    return this.unitsService.findAll(
+      { page: query.page, limit: query.limit },
+      query.onlyActive,
+    );
   }
 
   @Get(':id')
