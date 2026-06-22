@@ -12,7 +12,9 @@
     { "key": "adminAccessToken", "value": "", "type": "string" },
     { "key": "unitId", "value": "", "type": "string" },
     { "key": "productId", "value": "", "type": "string" },
-    { "key": "orderId", "value": "", "type": "string" }
+    { "key": "orderId", "value": "", "type": "string" },
+    { "key": "paidOrderId", "value": "", "type": "string" },
+    { "key": "refusedOrderId", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -964,6 +966,221 @@
                   "pm.test('Status 200', () => pm.response.to.have.status(200));",
                   "const json = pm.response.json();",
                   "pm.test('currentStatus CANCELLED', () => pm.expect(json.currentStatus).to.eql('CANCELLED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments (Pagamentos Mock)",
+      "item": [
+        {
+          "name": "T31 — Cliente cria pedido pequeno para aprovar (positivo, 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": {{unitId}},\n  \"canalPedido\": \"APP\",\n  \"items\": [\n    { \"productId\": {{productId}}, \"quantity\": 2 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            },
+            "description": "Cria novo pedido pequeno (~R$50) para teste de aprovação de pagamento mock."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('paidOrderId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T32 — Processa pagamento APROVADO (positivo, 200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{paidOrderId}}/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{paidOrderId}}", "process"]
+            },
+            "description": "Processa pagamento do pedido pequeno (~R$50). Mock aprova valor ≤ R$1000. Esperado: APPROVED + pedido vira IN_PREPARATION + cliente ganha pontos."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('payment APPROVED', () => pm.expect(json.payment.status).to.eql('APPROVED'));",
+                  "pm.test('order IN_PREPARATION', () => pm.expect(json.order.currentStatus).to.eql('IN_PREPARATION'));",
+                  "pm.test('pontos creditados', () => pm.expect(json.pointsEarned).to.be.above(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T33 — Cliente cria pedido grande para recusar (positivo, 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": {{unitId}},\n  \"canalPedido\": \"WEB\",\n  \"items\": [\n    { \"productId\": {{productId}}, \"quantity\": 41 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            },
+            "description": "Cria pedido grande (~R$1020) para teste de recusa de pagamento mock."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('refusedOrderId', json.id);",
+                  "pm.test('total acima de R$1000', () => pm.expect(json.total).to.be.above(1000));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T34 — Processa pagamento RECUSADO (positivo, 200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{refusedOrderId}}/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{refusedOrderId}}", "process"]
+            },
+            "description": "Processa pagamento do pedido grande (~R$1020). Mock recusa valor > R$1000. Esperado: REFUSED + pedido continua WAITING_PAYMENT + 0 pontos."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('payment REFUSED', () => pm.expect(json.payment.status).to.eql('REFUSED'));",
+                  "pm.test('order continua WAITING_PAYMENT', () => pm.expect(json.order.currentStatus).to.eql('WAITING_PAYMENT'));",
+                  "pm.test('zero pontos', () => pm.expect(json.pointsEarned).to.eql(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T35 — Retry cria nova tentativa pendente (positivo, 201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{refusedOrderId}}/retry",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{refusedOrderId}}", "retry"]
+            },
+            "description": "Após recusa, cliente solicita nova tentativa. Esperado: 201 + Payment novo com status PENDING e attemptNumber=2."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('status PENDING', () => pm.expect(json.status).to.eql('PENDING'));",
+                  "pm.test('attemptNumber 2', () => pm.expect(json.attemptNumber).to.eql(2));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T36 — Process em pedido já aprovado (negativo, 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{paidOrderId}}/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{paidOrderId}}", "process"]
+            },
+            "description": "Tenta processar pagamento de pedido que já está IN_PREPARATION. Esperado: 409 CONFLICT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "T37 — Listar tentativas de pagamento (positivo, 200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{refusedOrderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{refusedOrderId}}"]
+            },
+            "description": "Lista todas as tentativas (REFUSED + PENDING) do pedido recusado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Array com 2 tentativas', () => pm.expect(json).to.have.lengthOf(2));"
                 ],
                 "type": "text/javascript"
               }
