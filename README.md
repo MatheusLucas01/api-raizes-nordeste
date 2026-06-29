@@ -43,9 +43,30 @@ cd api-raizes-nordeste
 npm install
 ```
 
-### 3. Configurar variáveis de ambiente
+### 3. Criar o banco no PostgreSQL
 
-Copie o arquivo de exemplo e ajuste os valores:
+Antes de configurar o `.env`, é necessário ter um banco PostgreSQL vazio criado. O Prisma **não cria o banco** automaticamente — ele apenas aplica o schema em um banco que já existe.
+
+**Opção A — via terminal (`psql`):**
+
+```bash
+psql -U postgres
+```
+
+Dentro do prompt do psql:
+
+```sql
+CREATE DATABASE api_raizes;
+\q
+```
+
+**Opção B — via interface gráfica:**
+
+Use pgAdmin, DBeaver, TablePlus ou o Prisma Studio para criar um banco vazio. Anote o nome do banco, o usuário e a senha — esses dados serão usados no próximo passo.
+
+### 4. Configurar variáveis de ambiente
+
+Copie o arquivo de exemplo e ajuste os valores conforme o banco criado no passo anterior:
 
 ```bash
 cp .env.example .env
@@ -64,25 +85,33 @@ JWT_REFRESH_EXPIRES_IN="7d"
 PORT=8000
 ```
 
-Para gerar segredos fortes, rode:
+Exemplo de `DATABASE_URL` para banco local:
+
+```env
+DATABASE_URL="postgresql://postgres:senha@localhost:5432/api_raizes?schema=public"
+```
+
+Para gerar segredos fortes do JWT, rode:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"
 ```
 
-### 4. Criar o schema do banco e aplicar migrations
+### 5. Aplicar as migrations no banco
+
+Com o banco criado e o `.env` configurado, aplique o schema:
 
 ```bash
 npx prisma migrate deploy
 ```
 
-Em ambiente de desenvolvimento, use:
+Em ambiente de desenvolvimento (cria o banco automaticamente se não existir e aplica migrations pendentes), use:
 
 ```bash
 npx prisma migrate dev
 ```
 
-### 5. Popular o banco com dados iniciais (seed)
+### 6. Popular o banco com dados iniciais (seed)
 
 ```bash
 npm run seed
