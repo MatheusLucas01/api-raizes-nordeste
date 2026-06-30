@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
@@ -24,6 +24,12 @@ export class OrderItemInputDto {
   quantity!: number;
 }
 
+// Converte 0, null e string vazia em undefined ANTES da validação rodar.
+// Necessário porque o Swagger UI manda 0 como valor default no body de exemplo
+// para campos number, mas semanticamente 0 deve ser tratado como "não informado".
+const emptyToUndefined = ({ value }: { value: unknown }) =>
+  value === 0 || value === null || value === '' ? undefined : value;
+
 export class CreateOrderDto {
   @ApiProperty({ example: 1 })
   @IsInt({ message: 'unitId deve ser um número inteiro.' })
@@ -46,17 +52,19 @@ export class CreateOrderDto {
 
   @ApiPropertyOptional({
     description:
-      'Pontos a serem resgatados. Omita ou envie maior que zero. Apenas cliente identificado pode resgatar.',
+      'Pontos a serem resgatados. Envie 0 (ou omita) para não resgatar. Apenas cliente identificado pode resgatar.',
   })
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsInt({ message: 'usePoints deve ser um número inteiro.' })
-  @Min(0, { message: 'usePoints não pode ser negativo.' })
+  @Min(1, { message: 'usePoints deve ser maior que zero (envie 0 ou omita para não resgatar).' })
   usePoints?: number;
 
   @ApiPropertyOptional({
     description:
-      'Id do cliente em nome de quem o pedido é criado. APENAS PARA STAFF (atendente, gerente, admin). Cliente comum deve OMITIR este campo — o id é extraído do JWT.',
+      'Id do cliente em nome de quem o pedido é criado. APENAS PARA STAFF (atendente, gerente, admin). Cliente comum deve enviar 0 ou omitir — o id é extraído do JWT.',
   })
+  @Transform(emptyToUndefined)
   @IsOptional()
   @IsInt({ message: 'clientId deve ser um número inteiro.' })
   @IsPositive({ message: 'clientId deve ser positivo.' })

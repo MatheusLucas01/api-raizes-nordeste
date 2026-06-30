@@ -62,7 +62,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Maria Silva\",\n  \"email\": \"maria@test.com\",\n  \"password\": \"Senha@123\",\n  \"lgpdConsent\": true\n}"
+              "raw": "{\n  \"name\": \"Matheus Santos\",\n  \"email\": \"matheus@teste.com\",\n  \"password\": \"Teste@123\",\n  \"lgpdConsent\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -92,7 +92,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"maria@test.com\",\n  \"password\": \"Senha@123\"\n}"
+              "raw": "{\n  \"email\": \"matheus@teste.com\",\n  \"password\": \"Teste@123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -123,7 +123,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"maria@test.com\",\n  \"password\": \"SenhaErrada\"\n}"
+              "raw": "{\n  \"email\": \"matheus@teste.com\",\n  \"password\": \"SenhaErrada\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
