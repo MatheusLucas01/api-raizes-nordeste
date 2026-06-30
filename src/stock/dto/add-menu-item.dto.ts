@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsInt,
   IsNumber,
@@ -21,10 +21,9 @@ export class AddMenuItemDto {
   @IsPositive({ message: 'localPrice deve ser positivo.' })
   localPrice!: number;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     example: 50,
-    description: 'Estoque inicial (gera StockMovement IN se > 0).',
+    description: 'Estoque inicial (gera StockMovement IN se > 0). Omita para começar com zero.',
   })
   @IsOptional()
   @IsInt({ message: 'initialQuantity deve ser um número inteiro.' })

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -44,20 +44,18 @@ export class CreateOrderDto {
   @Type(() => OrderItemInputDto)
   items!: OrderItemInputDto[];
 
-  @ApiProperty({
-    required: false,
-    example: 0,
-    description: 'Pontos a serem resgatados (apenas cliente identificado).',
+  @ApiPropertyOptional({
+    description:
+      'Pontos a serem resgatados. Omita ou envie maior que zero. Apenas cliente identificado pode resgatar.',
   })
   @IsOptional()
   @IsInt({ message: 'usePoints deve ser um número inteiro.' })
   @Min(0, { message: 'usePoints não pode ser negativo.' })
   usePoints?: number;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     description:
-      'Id do cliente em nome de quem o pedido é criado. Apenas para staff.',
+      'Id do cliente em nome de quem o pedido é criado. APENAS PARA STAFF (atendente, gerente, admin). Cliente comum deve OMITIR este campo — o id é extraído do JWT.',
   })
   @IsOptional()
   @IsInt({ message: 'clientId deve ser um número inteiro.' })

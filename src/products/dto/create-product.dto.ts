@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateProductDto {
@@ -7,8 +7,7 @@ export class CreateProductDto {
   @MinLength(2, { message: 'O nome deve ter ao menos 2 caracteres.' })
   name!: string;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     example:
       'Cuscuz nordestino acompanhado de carne de sol e manteiga de garrafa.',
   })
@@ -16,12 +15,12 @@ export class CreateProductDto {
   @IsString({ message: 'A descrição deve ser um texto.' })
   description?: string;
 
-  @ApiProperty({ required: false, example: 'Pratos' })
+  @ApiPropertyOptional({ example: 'Pratos' })
   @IsOptional()
   @IsString({ message: 'A categoria deve ser um texto.' })
   category?: string;
 
-  @ApiProperty({ required: false, default: true })
+  @ApiPropertyOptional({ default: true })
   @IsOptional()
   @IsBoolean({ message: 'isActive deve ser verdadeiro ou falso.' })
   isActive?: boolean;

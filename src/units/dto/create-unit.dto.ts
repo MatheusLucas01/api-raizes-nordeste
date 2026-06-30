@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsBoolean, IsString, MinLength } from 'class-validator';
 
 export class CreateUnitDto {
@@ -12,7 +12,7 @@ export class CreateUnitDto {
   @MinLength(5, { message: 'O endereço deve ter ao menos 5 caracteres.' })
   address!: string;
 
-  @ApiProperty({ required: false, default: true })
+  @ApiPropertyOptional({ default: true })
   @IsOptional()
   @IsBoolean({ message: 'isActive deve ser verdadeiro ou falso.' })
   isActive?: boolean;

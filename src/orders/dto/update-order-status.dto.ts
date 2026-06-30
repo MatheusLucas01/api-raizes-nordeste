@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { OrderStatus } from '../../generated/prisma/client';
 
@@ -10,7 +10,7 @@ export class UpdateOrderStatusDto {
   })
   newStatus!: OrderStatus;
 
-  @ApiProperty({ required: false, maxLength: 255 })
+  @ApiPropertyOptional({ maxLength: 255 })
   @IsOptional()
   @IsString({ message: 'reason deve ser um texto.' })
   @MaxLength(255, { message: 'reason deve ter no máximo 255 caracteres.' })

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsInt,
@@ -24,8 +24,7 @@ export class CreateMovementDto {
   @IsPositive({ message: 'quantity deve ser positivo.' })
   quantity!: number;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     example: 'Reposição mensal',
     maxLength: 255,
   })

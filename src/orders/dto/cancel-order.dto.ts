@@ -1,9 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CancelOrderDto {
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     example: 'Cliente desistiu antes do pagamento.',
     maxLength: 255,
   })

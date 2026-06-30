@@ -1,8 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class UpdateMenuItemDto {
-  @ApiProperty({ required: false, example: 29.9 })
+  @ApiPropertyOptional({ example: 29.9 })
   @IsOptional()
   @IsNumber(
     { maxDecimalPlaces: 2 },
@@ -11,7 +11,7 @@ export class UpdateMenuItemDto {
   @IsPositive({ message: 'localPrice deve ser positivo.' })
   localPrice?: number;
 
-  @ApiProperty({ required: false, example: true })
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean({ message: 'isAvailable deve ser verdadeiro ou falso.' })
   isAvailable?: boolean;

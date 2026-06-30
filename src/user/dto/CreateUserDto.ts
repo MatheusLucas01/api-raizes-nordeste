@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Equals,
   IsBoolean,
@@ -32,10 +32,9 @@ export class CreateUserDto {
   @Equals(true, { message: 'O consentimento LGPD é obrigatório.' })
   lgpdConsent!: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: Role,
-    required: false,
-    description: 'Papel do usuário. Apenas ADMIN pode definir.',
+    description: 'Papel do usuário. Apenas ADMIN pode definir. Omita para criar como CLIENT.',
   })
   @IsOptional()
   @IsEnum(Role, {

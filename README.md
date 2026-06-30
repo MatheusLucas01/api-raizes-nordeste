@@ -23,7 +23,9 @@ API REST multicanal com autenticação JWT, controle de estoque por unidade, má
 
 - Node.js 22 ou superior
 - npm 10 ou superior
-- PostgreSQL 14 ou superior, com banco vazio criado
+- **PostgreSQL** — duas opções:
+  - **Opção recomendada:** Docker + Docker Compose (sobe o banco com um comando, sem instalar PostgreSQL no sistema)
+  - **Opção alternativa:** PostgreSQL 14+ instalado nativamente
 - Git
 
 ---
@@ -43,11 +45,55 @@ cd api-raizes-nordeste
 npm install
 ```
 
-### 3. Criar o banco no PostgreSQL
+### 3. Subir o PostgreSQL
 
-Antes de configurar o `.env`, é necessário ter um banco PostgreSQL vazio criado. O Prisma **não cria o banco** automaticamente — ele apenas aplica o schema em um banco que já existe.
+Antes de configurar o `.env`, o banco precisa estar rodando. Escolha uma das opções abaixo.
 
-**Opção A — via terminal (`psql`):**
+**Opção A (recomendada) — Docker Compose:**
+
+O projeto já vem com um `docker-compose.yml` configurado. Basta executar:
+
+```bash
+docker compose up -d
+```
+
+> **Atenção:** se você já tiver outro PostgreSQL rodando na porta `5434`, o comando vai falhar com erro `port is already allocated`. Pare o outro serviço, ou edite a porta no `docker-compose.yml` (linha `"5434:5432"`) e a `DATABASE_URL` do `.env` para uma porta livre (ex: `5435`).
+
+Isso sobe um container PostgreSQL 16 com:
+
+- **Usuário:** `postgres`
+- **Senha:** `admin`
+- **Banco:** `api_raizes` (criado automaticamente)
+- **Porta no host:** `5434` (mapeada para `5432` interno)
+- **Volume persistente** (`postgres_data`) — seus dados sobrevivem a `docker compose down`
+
+Para confirmar que o container está saudável:
+
+```bash
+docker compose ps
+```
+
+Para parar o banco (sem apagar dados):
+
+```bash
+docker compose stop
+```
+
+Para parar e remover o container (mantém o volume com dados):
+
+```bash
+docker compose down
+```
+
+Para apagar **tudo, inclusive os dados** (cuidado):
+
+```bash
+docker compose down -v
+```
+
+**Opção B — PostgreSQL instalado nativamente:**
+
+Se você já tem PostgreSQL local, crie o banco vazio:
 
 ```bash
 psql -U postgres
@@ -60,9 +106,7 @@ CREATE DATABASE api_raizes;
 \q
 ```
 
-**Opção B — via interface gráfica:**
-
-Use pgAdmin, DBeaver, TablePlus ou o Prisma Studio para criar um banco vazio. Anote o nome do banco, o usuário e a senha — esses dados serão usados no próximo passo.
+Ou use pgAdmin, DBeaver, TablePlus para criar o banco via interface gráfica.
 
 ### 4. Configurar variáveis de ambiente
 
@@ -85,11 +129,17 @@ JWT_REFRESH_EXPIRES_IN="7d"
 PORT=8000
 ```
 
-Exemplo de `DATABASE_URL` para banco local:
+Exemplos de `DATABASE_URL`:
 
 ```env
-DATABASE_URL="postgresql://postgres:senha@localhost:5432/api_raizes?schema=public"
+# Se você está usando o docker-compose.yml deste projeto (Opção A):
+DATABASE_URL="postgresql://postgres:admin@localhost:5434/api_raizes?schema=public"
+
+# Se você está usando PostgreSQL instalado localmente (Opção B):
+DATABASE_URL="postgresql://postgres:SUA_SENHA@localhost:5432/api_raizes?schema=public"
 ```
+
+A **porta padrão do PostgreSQL é 5432**, mas o nosso `docker-compose.yml` mapeia para **5434** no host, para evitar conflito com instalações locais.
 
 Para gerar segredos fortes do JWT, rode:
 
